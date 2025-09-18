@@ -1,24 +1,28 @@
-Laboratory of Bioinformatics 2 – Project
+# Laboratory of Bioinformatics 2 – Project
 
 This repository contains files and code for the Laboratory of Bioinformatics 2 course.  
 Below is the main script for retrieving **positive** and **negative** protein sets from UniProt.
+
+---
+
+## Python Code
 
 ```python
 import requests
 from requests.adapters import HTTPAdapter, Retry
 import json
 import re 
-```
+
 def get_kingdom(entry):
-    if "Metazoa" in entry["organism"]["lineage"]:
-        k = "Metazoa"
-    elif "Viridiplantae" in entry["organism"]["lineage"]:
-        k = "Viridiplantae"
-    elif "Fungi" in entry["organism"]["lineage"]:
-        k = "Fungi"
-    else:
-        k = "Other"
-    return k
+  if "Metazoa" in entry["organism"]["lineage"]:
+    k = "Metazoa"
+  elif "Viridiplantae" in entry["organism"]["lineage"]:
+    k = "Viridiplantae"
+  elif "Fungi" in entry["organism"]["lineage"]:
+    k = "Fungi"
+  else:
+    k = "Other"
+  return k
 
 def filter_entry_positive(entry):
     try:
@@ -47,10 +51,10 @@ def json_to_tsv_negative(entry):
     tm = False
     for f in entry["features"]:
         if f["type"]=="Transmembrane":
-            if re.search("Helical", f["description"]):
-                if f["location"]["start"]["value"] <= 90:
-                    tm = True
-                    break
+          if re.search("Helical",f["description"]):
+            if f["location"]["start"]["value"]<=90:
+              tm = True
+              break
 
     return (entry["primaryAccession"],
             entry["organism"]["scientificName"],
@@ -76,20 +80,20 @@ def get_batch(batch_url):
 def get_dataset(search_url, filter_function, json_to_tsv_function, columns, output_file_name, output_fasta_file_name):
     n_total, n_filtered = 0, 0
     with open(output_file_name, 'w') as ofs:
-        print(*columns, sep="\t", file=ofs)
-        with open(output_fasta_file_name, 'w') as ofs_fasta:
-            for batch, total in get_batch(search_url):
-                batch_json = json.loads(batch.text)
-                for entry in batch_json["results"]:
-                    n_total += 1
-                    if filter_function(entry):
-                        n_filtered += 1
-                        fields = json_to_tsv_function(entry)
-                        print(*fields, sep="\t", file=ofs)
-                        print(">", entry["primaryAccession"], sep="", file=ofs_fasta)
-                        print(entry["sequence"]["value"], file=ofs_fasta)
-            ofs_fasta.close()
-        ofs.close
+      print(*columns, sep="\t", file=ofs)
+      with open(output_fasta_file_name, 'w') as ofs_fasta:
+        for batch, total in get_batch(search_url):
+          batch_json = json.loads(batch.text)
+          for entry in batch_json["results"]:
+            n_total += 1
+            if filter_function(entry):
+              n_filtered += 1
+              fields = json_to_tsv_function(entry)
+              print(*fields, sep="\t", file=ofs)
+              print(">", entry["primaryAccession"], sep="", file=ofs_fasta)
+              print(entry["sequence"]["value"], file=ofs_fasta)
+        ofs_fasta.close()
+      ofs.close
     print(f"Total: {n_total}, filtered: {n_filtered}")
 
 # --- Setup ---
@@ -98,9 +102,9 @@ retries = Retry(total=5, backoff_factor=0.25, status_forcelist=[500, 502, 503, 5
 session = requests.Session()
 session.mount("https://", HTTPAdapter(max_retries=retries))
 
-url_positive = "https://rest.uniprot.org/uniprotkb/search?format=json&query=%28%28existence%3A1%29+AND+%28taxonomy_id%3A2759%29+AND+%28ft_signal_exp%3A*%29+AND+%28length%3A%5B40+TO+*%5D%29+AND+%28reviewed%3Atrue%29+AND+%28fragment%3Afalse%29%29&size=500"
+url_positive="https://rest.uniprot.org/uniprotkb/search?format=json&query=%28%28existence%3A1%29+AND+%28taxonomy_id%3A2759%29+AND+%28ft_signal_exp%3A*%29+AND+%28length%3A%5B40+TO+*%5D%29+AND+%28reviewed%3Atrue%29+AND+%28fragment%3Afalse%29%29&size=500"
 
-url_negative = "https://rest.uniprot.org/uniprotkb/search?format=json&query=%28%28fragment%3Afalse%29+AND+%28reviewed%3Atrue%29+AND+%28existence%3A1%29+AND+%28taxonomy_id%3A2759%29+AND+%28length%3A%5B40+TO+*%5D%29+AND+NOT+%28ft_signal%3A*%29+AND+%28cc_scl_term_exp%3ASL-0091+OR+cc_scl_term_exp%3ASL-0191+OR+cc_scl_term_exp%3ASL-0173+OR+cc_scl_term_exp%3ASL-0209+OR+cc_scl_term_exp%3ASL-0204+OR+cc_scl_term_exp%3ASL-0039%29%29&size=500"
+url_negative="https://rest.uniprot.org/uniprotkb/search?format=json&query=%28%28fragment%3Afalse%29+AND+%28reviewed%3Atrue%29+AND+%28existence%3A1%29+AND+%28taxonomy_id%3A2759%29+AND+%28length%3A%5B40+TO+*%5D%29+AND+NOT+%28ft_signal%3A*%29+AND+%28cc_scl_term_exp%3ASL-0091+OR+cc_scl_term_exp%3ASL-0191+OR+cc_scl_term_exp%3ASL-0173+OR+cc_scl_term_exp%3ASL-0209+OR+cc_scl_term_exp%3ASL-0204+OR+cc_scl_term_exp%3ASL-0039%29%29&size=500"
 
 col_positive = ["Accession", "Organism", "Kingdom", "Sequence length", "SP cleavage"]
 col_negative = ["Accession", "Organism", "Kingdom", "Sequence length", "N-term transmembrane"]
@@ -117,3 +121,14 @@ positive_set = pd.read_csv("positive.tsv", sep="\t")
 print(len(positive_set))
 print(len(negative_set))
 print(len(negative_set[negative_set["N-term transmembrane"] == True]))
+```
+
+---
+
+## ✅ Example Output
+
+```
+2932
+20615
+2465
+```
