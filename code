@@ -2,15 +2,16 @@
 
 This repository contains files and code for the Laboratory of Bioinformatics 2 course.  
 Below is the main script for retrieving **positive** and **negative** protein sets from UniProt.
-# ex
 
+---
+
+##  Python Code
 
 ```python
 import requests
 from requests.adapters import HTTPAdapter, Retry
 import json
 import re 
-```
 
 def get_kingdom(entry):
     if "Metazoa" in entry["organism"]["lineage"]:
