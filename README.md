@@ -21,6 +21,7 @@ Selection criteria: Proteins without annotated signal peptides but meeting other
 
 API Endpoint:
 https://rest.uniprot.org/uniprotkb/search?format=json&query=%28%28fragment%3Afalse%29+AND+%28reviewed%3Atrue%29+AND+%28existence%3A1%29+AND+%28taxonomy_id%3A2759%29+AND+%28length%3A%5B40+TO+*%5D%29+AND+NOT+%28ft_signal%3A*%29+AND+%28cc_scl_term_exp%3ASL-0091+OR+cc_scl_term_exp%3ASL-0191+OR+cc_scl_term_exp%3ASL-0173+OR+cc_scl_term_exp%3ASL-0209+OR+cc_scl_term_exp%3ASL-0204+OR+cc_scl_term_exp%3ASL-0039%29%29&size=500
+
 Notes: This endpoint also returns results in chunks of 500 and requires pagination.
 
 Project Overview
