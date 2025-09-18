@@ -2,6 +2,7 @@
 Laboratory of Bioinformatics 2 – Project Files
 
 This repository includes all the scripts and data used for the Laboratory of Bioinformatics 2 course project. It focuses on preparing and analyzing protein datasets retrieved from UniProt.
+
 Positive Protein Set
 
 
