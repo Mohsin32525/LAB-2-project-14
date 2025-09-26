@@ -1,4 +1,13 @@
 # LAB-2-project-14
+Table of Contents
+Data Collection
+Data_Preparation
+Analysis
+Feature extraction
+Implement ML algorithms
+Model evaluation
+Discussion
+
 Laboratory of Bioinformatics 2 – Project Files
 
 This repository includes all the scripts and data used for the Laboratory of Bioinformatics 2 course project. It focuses on preparing and analyzing protein datasets retrieved from UniProt.
