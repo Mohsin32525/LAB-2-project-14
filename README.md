@@ -1,9 +1,9 @@
 # LAB-2-project-14
 Table of Contents
 
-Data Collection
+1.Data Collection
 
-Data_Preparation
+2.Data_Preparation
 
 Analysis
 
