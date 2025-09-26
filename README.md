@@ -1,5 +1,5 @@
 # LAB-2-project-14
-#Table of Contents
+Table of Contents
 
 Data Collection
 
