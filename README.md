@@ -1,12 +1,37 @@
 # LAB-2-project-14
-Table of Contents
-Data Collection
-Data_Preparation
-Analysis
-Feature extraction
-Implement ML algorithms
-Model evaluation
-Discussion 
+# Project Title
+
+## Table of Contents
+
+- [Data Collection](#data-collection)
+- [Data Preparation](#data-preparation)
+- [Analysis](#analysis)
+- [Feature Extraction](#feature-extraction)
+- [Implement ML Algorithms](#implement-ml-algorithms)
+- [Model Evaluation](#model-evaluation)
+- [Discussion](#discussion)
+
+## Data Collection
+Details here...
+
+## Data Preparation
+Details here...
+
+## Analysis
+Details here...
+
+## Feature Extraction
+Details here...
+
+## Implement ML Algorithms
+Details here...
+
+## Model Evaluation
+Details here...
+
+## Discussion
+Details here...
+
 
 Laboratory of Bioinformatics 2 – Project Files
 
