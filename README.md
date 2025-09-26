@@ -16,10 +16,6 @@ This repository includes all the scripts and data used for the Laboratory of Bio
 ## Data Collection
 Details here...
 
-## Data Preparation
-Details here...
-
-
  It focuses on preparing and analyzing protein datasets retrieved from UniProt.
 
 Positive Protein Set
