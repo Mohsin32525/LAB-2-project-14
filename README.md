@@ -39,6 +39,10 @@ https://rest.uniprot.org/uniprotkb/search?format=json&query=%28%28fragment%3Afal
 
 Notes: This endpoint also returns results in chunks of 500 and requires pagination.
 
+## Data Preparation
+Details here...
+
+
 Project Overview
 
 The repository provides a foundation for protein sequence analysis, useful for tasks such as signal peptide prediction, dataset preparation, or other bioinformatics workflows. All codes are implemented in Python.
