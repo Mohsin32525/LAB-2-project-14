@@ -1,11 +1,18 @@
 # LAB-2-project-14
 Table of Contents
+
 Data Collection
+
 Data_Preparation
+
 Analysis
+
 Feature extraction
+
 Implement ML algorithms
+
 Model evaluation
+
 Discussion
 
 Laboratory of Bioinformatics 2 – Project Files
