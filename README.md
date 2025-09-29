@@ -45,19 +45,20 @@ API Endpoint:
 https://rest.uniprot.org/uniprotkb/search?format=json&query=%28%28fragment%3Afalse%29+AND+%28reviewed%3Atrue%29+AND+%28existence%3A1%29+AND+%28taxonomy_id%3A2759%29+AND+%28length%3A%5B40+TO+*%5D%29+AND+NOT+%28ft_signal%3A*%29+AND+%28cc_scl_term_exp%3ASL-0091+OR+cc_scl_term_exp%3ASL-0191+OR+cc_scl_term_exp%3ASL-0173+OR+cc_scl_term_exp%3ASL-0209+OR+cc_scl_term_exp%3ASL-0204+OR+cc_scl_term_exp%3ASL-0039%29%29&size=500
 
 Notes: This endpoint also returns results in chunks of 500 and requires pagination.
-2. API-Based Data Retrieval
 
-Two Jupyter notebooks were developed to automate dataset construction via the UniProt API:
 
-get_dataset_pos.ipynb → retrieves the positive set
+## 2. API-Based Data Retrieval
 
-get_dataset_neg.ipynb → retrieves the negative set
+Two scripts were developed to automate dataset construction via the UniProt API:
 
-Each script performs the API queries, outputs results in both .tsv and .fasta formats, and applies filtering rules:
+- [get_dataset_pos.ipynb](get_dataset_pos.ipynb) → retrieves the **positive set**  
+- [get_dataset_neg.ipynb](get_dataset_neg.ipynb) → retrieves the **negative set**  
 
-Positive set: sequences are retained only if they contain a signal peptide of at least 14 amino acids and a defined cleavage site.
+Each script performs the API queries, outputs results in both **.tsv** and **.fasta** formats, and applies filtering rules:
 
-Negative set: sequences are kept only if they contain a transmembrane helix within the first 90 residues.
+- **Positive set**: sequences are retained only if they contain a signal peptide of at least 14 amino acids and a defined cleavage site.  
+- **Negative set**: sequences are kept only if they contain a transmembrane helix within the first 90 residues.  
+
 
 3. Data Collection Output
 
