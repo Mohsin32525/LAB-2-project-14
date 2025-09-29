@@ -72,11 +72,13 @@ Negative set: UniProt accession, organism name, kingdom, sequence length, and pr
 
 .fasta files → contain the corresponding protein sequences.
 
-Summary of Retrieved Proteins
-Dataset	Count
-Positive Set	2,932
-Negative Set	20,615
-Negatives with Helix	1,384
+### Summary of Retrieved Proteins
+
+| Dataset              | Count  |
+|----------------------|--------|
+| Positive Set         | 2,932  |
+| Negative Set         | 20,615 |
+| Negatives with Helix | 1,384  |
 
 ## Data Preparation
 Details here...
