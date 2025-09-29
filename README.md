@@ -14,7 +14,7 @@ This repository includes all the scripts and data used for the Laboratory of Bio
 - [Discussion](#discussion)
 
 ## Data Collection
-Details here...
+
 
  It focuses on preparing and analyzing protein datasets retrieved from UniProt.
 
