@@ -81,7 +81,25 @@ Negative set: UniProt accession, organism name, kingdom, sequence length, and pr
 | Negatives with Helix | 1,384  |
 
 ## Data Preparation
-Details here...
+# 🧬 Reducing Data Redundancy and Preparing Datasets
+
+Prepare clean datasets for machine learning by removing redundancy and selecting representative sequences.
+
+## Steps
+
+1. **Cluster sequences** using MMSeqs2 to remove similar sequences.  
+2. **Select representatives** with `filter_representatives.py`.  
+3. **Split data** into 80% training and 20% testing (`split_train_test.py`).  
+4. **Create 5-fold cross-validation** sets (`make_crossval_folds.py`).  
+5. **Verify** results using `wc -l` and `uniq -c`.
+
+## Output
+
+- Non-redundant FASTA and filtered metadata files.  
+- Training/test splits and fold assignments.
+
+ Result: Clean, balanced, reproducible datasets for ML.
+
 
 
 Project Overview
