@@ -60,10 +60,11 @@ Parameters
 --cluster-mode 1 → Greedy set cover clustering
 
 Run separately for:
-
+```
 positive.fasta
 
 negative.fasta
+```
 
 Output Files
 
@@ -76,18 +77,56 @@ Output Files
 | `negative_cluster_all_seqs.fasta` | All cluster members (negatives)      |
 | `negative_cluster_cluster.tsv`    | Cluster mapping (negatives)          |
 
-<details> <summary>🎯 <b>Step 4 — Building 5-Fold Cross-Validation Subsets</b></summary>
+## Step 2 — Selecting Representative Sequences
 
-Maintain balanced positive/negative ratios across folds.
-```
-python3 scripts/make_crossval_folds.py positive_train.tsv negative_train.tsv train_folds.tsv
-```
-### Output File
+Filters the .tsv metadata file to keep only representative sequences obtained after MMSeqs2 clustering.
 
-| File | Description |
-|------|--------------|
-| `train_folds.tsv` | Training sequences with assigned fold (1–5) |
-Each sequence appears once in validation during cross-validation.
+Command
+```
+python scripts/filter_representatives.py input.tsv rep_sequences.fasta representatives.tsv
+
+
+Inputs
+
+input.tsv → Metadata file containing all sequences
+
+rep.fasta → FASTA file with cluster representative sequences
+
+output.tsv → Filtered metadata file (representatives only 
+```
+Example Usage
+```
+python3 scripts/filter_representatives.py positive.tsv positive_cluster_rep_seq.fasta positive_filtered.tsv
+python3 scripts/filter_representatives.py negative.tsv negative_cluster_rep_seq.fasta negative_filtered.tsv
+```
+Output Files
+📁 File	🧾 Description
+positive_filtered.tsv	Filtered metadata for representative positive sequences (~2933 → ~1094)
+negative_filtered.tsv	Filtered metadata for representative negative sequences (~20616 → ~8935)
+| 📁 File                     | 🧾 Description                                                                 |
+|-----------------------------|-------------------------------------------------------------------------------|
+| `positive_filtered.tsv`      | Filtered metadata for representative positive sequences (~2933 → ~1094)       |
+| `negative_filtered.tsv`      | Filtered metadata for representative negative sequences (~20616 → ~8935)     |
+``
+Ensures one representative per cluster, reducing redundancy.
+
+## Step 3 — Splitting Training and Benchmarking Data
+
+Command
+```
+python3 scripts/split_train_test.py positive_filtered.tsv positive_train.tsv positive_test.tsv
+python3 scripts/split_train_test.py negative_filtered.tsv negative_train.tsv negative_test.tsv
+```
+| 📁 File               | 🧾 Description                                                |
+|----------------------|---------------------------------------------------------------|
+| `positive_train.tsv`  | 80% of positive representative sequences (training)          |
+| `positive_test.tsv`   | 20% of positive representative sequences (testing)           |
+| `negative_train.tsv`  | 80% of negative representative sequences (training)          |
+| `negative_test.tsv`   | 20% of negative representative sequences (testing)           |
+
+Split the non-redundant datasets into 80% training and 20% benchmarking/testing sets.
+
+🧰 Command
 
 </details>
 ### 🧾 Verification Steps
