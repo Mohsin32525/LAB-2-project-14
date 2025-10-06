@@ -49,54 +49,53 @@ output.tsv → filtered metadata file (representatives only)
 python scripts/filter_representatives.py input.tsv rep_sequences.fasta representatives.tsv
 ```
 
-2. make_folds.py
+Parameters
 
-Generates stratified 5-fold cross-validation splits from the non-redundant dataset. Ensures that each fold preserves the class balance between positive and negative sequences.
+--min-seq-id 0.3 → Cluster at 30% sequence identity
 
-Inputs:
+-c 0.4 → Minimum coverage 40%
 
-positives.tsv → filtered positive dataset
+--cov-mode 0 → Full-length alignment mode
 
-negatives.tsv → filtered negative dataset
+--cluster-mode 1 → Greedy set cover clustering
 
-output.tsv → combined dataset with assigned fold numbers
+Run separately for:
 
-```bash
+positive.fasta
 
-python scripts/make_folds.py positives.tsv negatives.tsv dataset_with_folds.tsv
+negative.fasta
 
-3. split_train_test.py
+Output Files
+
+| File                              | Description                          |
+| --------------------------------- | ------------------------------------ |
+| `positive_cluster_rep_seq.fasta`  | Representative sequences (positives) |
+| `positive_cluster_all_seqs.fasta` | All cluster members (positives)      |
+| `positive_cluster_cluster.tsv`    | Cluster mapping (positives)          |
+| `negative_cluster_rep_seq.fasta`  | Representative sequences (negatives) |
+| `negative_cluster_all_seqs.fasta` | All cluster members (negatives)      |
+| `negative_cluster_cluster.tsv`    | Cluster mapping (negatives)          |
+
+<details> <summary>🎯 <b>Step 4 — Building 5-Fold Cross-Validation Subsets</b></summary>
+
+Maintain balanced positive/negative ratios across folds.
 ```
+python3 scripts/make_crossval_folds.py positive_train.tsv negative_train.tsv train_folds.tsv
+```
+### Output File
 
-Splits the dataset into 80% training and 20% benchmarking (holdout) sets.
-A fixed random seed (42) ensures reproducibility.
+| File | Description |
+|------|--------------|
+| `train_folds.tsv` | Training sequences with assigned fold (1–5) |
+Each sequence appears once in validation during cross-validation.
 
-Inputs:
+</details>
+### 🧾 Verification Steps
 
-input.tsv → full dataset (representatives)
+| Check                        | Command                                                                           | Expected Result                         |
+|------------------------------|-----------------------------------------------------------------------------------|------------------------------------------|
+| **Filtering effectiveness**  | `wc -l positive.tsv positive_filtered.tsv negative.tsv negative_filtered.tsv`     | Confirms reduced redundancy              |
+| **Train/test split (80/20)** | `wc -l positive_train.tsv positive_test.tsv negative_train.tsv negative_test.tsv` | Confirms 80/20 ratio                     |
+| **5-fold balance**           | `cut -f7 train_folds.tsv \| sort \| uniq -c`                                     | Shows folds 1–5 with balanced sequence counts |
 
-train.tsv → training set output file
 
-test.tsv → benchmarking set output file
-
-Usage:
-
-python scripts/split_train_test.py dataset_with_folds.tsv train.tsv test.tsv
-
-## Workflow
-
-Run filter_representatives.py to keep only representative sequences after clustering.
-
-Use split_train_test.py to divide the dataset into training (80%) and benchmarking (20%) sets.
-
-Apply make_folds.py on the training data to generate stratified 5-fold cross-validation subsets.
-
-📊 Output Files
-
-representatives.tsv → metadata for non-redundant representatives.
-
-train.tsv → training set (80%).
-
-test.tsv → benchmarking set (20%).
-
-dataset_with_folds.tsv → combined dataset with cross-validation fold assignments.
