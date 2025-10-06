@@ -1,3 +1,36 @@
+# 🧬 Practical Session I (Part B) — Reducing Data Redundancy and Preparing Datasets
+
+![Python](https://img.shields.io/badge/Python-3.8+-blue.svg)
+![MMSeqs2](https://img.shields.io/badge/MMSeqs2-%E2%9C%94-green)
+![License](https://img.shields.io/badge/License-MIT-yellow.svg)
+![Workflow](https://img.shields.io/badge/Data%20Processing-Bioinformatics-purple.svg)
+
+> **Goal:** Prepare clean, non-redundant datasets for downstream machine learning by reducing redundancy, selecting representative sequences, and organizing the data into structured training, benchmarking, and cross-validation subsets.
+
+---
+
+##  Overview
+
+| Step | Task | Tool/Script |
+|------|------|-------------|
+| 1️⃣ | Cluster positive & negative sequences | **MMSeqs2** |
+| 2️⃣ | Select representative sequences | `filter_representatives.py` |
+| 3️⃣ | Split data into training (80%) & test (20%) | `split_train_test.py` |
+| 4️⃣ | Build 5-fold cross-validation subsets | `make_crossval_folds.py` |
+| 5️⃣ | Verify dataset structure | Bash utilities |
+
+---
+
+<details>
+<summary> <b>Step 1 — Clustering Sequences with MMSeqs2</b></summary>
+
+Cluster positive and negative datasets independently to remove redundancy.
+
+```bash
+mmseqs easy-cluster input.fa cluster-results tmp --min-seq-id 0.3 -c 0.4 --cov-mode 0 --cluster-mode 1
+
+
+
 Scripts Overview
 1. filter_representatives.py
 
