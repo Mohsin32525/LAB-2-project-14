@@ -126,15 +126,44 @@ python3 scripts/split_train_test.py negative_filtered.tsv negative_train.tsv neg
 
 Split the non-redundant datasets into 80% training and 20% benchmarking/testing sets.
 
-🧰 Command
+### Step 4 — Building 5-Fold Cross-Validation Subsets
 
-</details>
-### 🧾 Verification Steps
+Maintain balanced positive/negative ratios across 5 folds.
 
-| Check                        | Command                                                                           | Expected Result                         |
-|------------------------------|-----------------------------------------------------------------------------------|------------------------------------------|
-| **Filtering effectiveness**  | `wc -l positive.tsv positive_filtered.tsv negative.tsv negative_filtered.tsv`     | Confirms reduced redundancy              |
-| **Train/test split (80/20)** | `wc -l positive_train.tsv positive_test.tsv negative_train.tsv negative_test.tsv` | Confirms 80/20 ratio                     |
-| **5-fold balance**           | `cut -f7 train_folds.tsv \| sort \| uniq -c`                                     | Shows folds 1–5 with balanced sequence counts |
+ Command
+ ```
+python3 scripts/make_crossval_folds.py positive_train.tsv negative_train.tsv train_folds.tsv
+```
+Outputfile
+
+| 📁 **File**       | 🧾 **Description**                          |
+| ----------------- | ------------------------------------------- |
+| `train_folds.tsv` | Training sequences with assigned fold (1–5) |
+
+Each sequence appears once in validation during cross-validation.
+
+### Step 5 — Verification Steps
+
+| 🧠 **Check**                 | 💻 **Command**                                                                    | 📊 **Expected Result**                        |
+| ---------------------------- | --------------------------------------------------------------------------------- | --------------------------------------------- |
+| **Filtering effectiveness**  | `wc -l positive.tsv positive_filtered.tsv negative.tsv negative_filtered.tsv`     | Confirms reduced redundancy                   |
+| **Train/test split (80/20)** | `wc -l positive_train.tsv positive_test.tsv negative_train.tsv negative_test.tsv` | Confirms 80/20 ratio                          |
+| **5-fold balance**           | `cut -f7 train_folds.tsv \| sort \| uniq -c`                                      | Shows folds 1–5 with balanced sequence counts |
+
+### Summary
+By completing Practical Session I (Part B), we have:
+
+🧹 Reduced redundancy in both positive & negative datasets (MMSeqs2)
+
+🧬 Selected representative sequences
+
+📑 Filtered metadata to keep only representatives
+
+🔀 Split datasets into 80/20 training and benchmarking sets
+
+🎯 Built 5-fold cross-validation subsets with balanced class ratios
+
+Result: A clean, balanced, and reproducible dataset ready for machine learning applications.
+
 
 
