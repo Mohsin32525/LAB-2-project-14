@@ -1,4 +1,4 @@
-# 🧬 Practical Session I (Part B) — Reducing Data Redundancy and Preparing Datasets
+# Reducing Data Redundancy and Preparing Datasets
 
 ![Python](https://img.shields.io/badge/Python-3.8+-blue.svg)
 ![MMSeqs2](https://img.shields.io/badge/MMSeqs2-%E2%9C%94-green)
@@ -21,14 +21,13 @@
 
 ---
 
-<details>
-<summary> <b>Step 1 — Clustering Sequences with MMSeqs2</b></summary>
+## Step 1 — Clustering Sequences with MMSeqs2
 
 Cluster positive and negative datasets independently to remove redundancy.
 
 ```bash
-mmseqs easy-cluster input.fa cluster-results tmp --min-seq-id 0.3 -c 0.4 --cov-mode 0 --cluster-mode 1
 
+mmseqs easy-cluster input.fa cluster-results tmp --min-seq-id 0.3 -c 0.4 --cov-mode 0 --cluster-mode 1
 
 
 Scripts Overview
