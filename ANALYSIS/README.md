@@ -24,7 +24,7 @@ To run the notebook, install the following Python libraries:
 pip install pandas numpy matplotlib seaborn logomaker
 ```
 ## Required libraries:
-
+```
 pandas
 
 numpy
@@ -32,7 +32,7 @@ numpy
 matplotlib
 
 seaborn
-
+```
 logomaker (for generating sequence logos)
 
 ## Analyses Performed
