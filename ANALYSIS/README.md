@@ -22,7 +22,7 @@ To run the notebook, install the following Python libraries:
 
 ```bash
 pip install pandas numpy matplotlib seaborn logomaker
-```
+
 Required libraries:
 
 pandas
