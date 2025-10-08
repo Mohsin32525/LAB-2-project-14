@@ -32,9 +32,9 @@ numpy
 matplotlib
 
 seaborn
-```
-logomaker (for generating sequence logos)
 
+logomaker (for generating sequence logos)
+```
 ## Analyses Performed
 ## 1. Protein Length Distribution
 
