@@ -1,168 +1,132 @@
-# Reducing Data Redundancy and Preparing Datasets
+# 🧬 Signal Peptide Prediction — Data Preparation
 
-![Python](https://img.shields.io/badge/Python-3.8+-blue.svg)
-![MMSeqs2](https://img.shields.io/badge/MMSeqs2-%E2%9C%94-green)
-![License](https://img.shields.io/badge/License-MIT-yellow.svg)
-![Workflow](https://img.shields.io/badge/Data%20Processing-Bioinformatics-purple.svg)
-
-> **Goal:** Prepare clean, non-redundant datasets for downstream machine learning by reducing redundancy, selecting representative sequences, and organizing the data into structured training, benchmarking, and cross-validation subsets.
+This project focuses on preparing **non-redundant, balanced datasets** for signal peptide prediction using machine learning.
 
 ---
 
-##  Overview
+## 1. Overview
 
-| Step | Task | Tool/Script |
-|------|------|-------------|
-| 1️⃣ | Cluster positive & negative sequences | **MMSeqs2** |
-| 2️⃣ | Select representative sequences | `filter_representatives.py` |
-| 3️⃣ | Split data into training (80%) & test (20%) | `split_train_test.py` |
-| 4️⃣ | Build 5-fold cross-validation subsets | `make_crossval_folds.py` |
-| 5️⃣ | Verify dataset structure | Bash utilities |
+Once preliminary sequence data are collected, the dataset is divided into two main subsets:
+
+- **Training set**: Used to train models, optimize hyperparameters, and perform cross-validation experiments.  
+- **Benchmarking set**: Also called the holdout dataset, reserved for testing model generalization on never-seen-before data.
 
 ---
 
-## Step 1 — Clustering Sequences with MMSeqs2
+## 2. Benchmarking Set: Motivation
 
-Cluster positive and negative datasets independently to remove redundancy.
+Cross-validation alone is not sufficient for an unbiased estimate of model performance:
 
+- Hyperparameter tuning via cross-validation may introduce overfitting.  
+- The holdout benchmarking dataset provides a stronger guarantee of **never-seen-before** evaluation.  
+- Models trained on subsets of the training data during cross-validation may bias results.  
+- Only the model evaluated on the benchmarking set is considered ready for production use.
 
-Commond
-```bash
+---
 
-mmseqs easy-cluster input.fa cluster-results tmp --min-seq-id 0.3 -c 0.4 --cov-mode 0 --cluster-mode 1
+## 3. Redundancy Reduction
 
+Before splitting, it is essential to create a **non-redundant dataset**:
 
-Scripts Overview
-1. filter_representatives.py
+- Control sequence identity and alignment coverage.  
+- Reduce redundancy using **clustering tools** (MMseqs2).  
+- Select **one representative sequence per cluster**.  
 
-Filters the .tsv metadata file to keep only the representative sequences obtained after MMseqs2 clustering.
+Once redundancy is addressed, the data can safely be split randomly.
 
-Inputs:
+---
 
-input.tsv → metadata file containing all sequences
+## 4. MMseqs2 Clustering
 
-rep.fasta → FASTA file with cluster representative sequences
+For clustering, **MMseqs2 v14.7e284** was used on both positive and negative datasets.
 
-output.tsv → filtered metadata file (representatives only)
+**Input files:**
 
-```bash
+- `positive_dataset.fasta`  
+- `negative_dataset.fasta`  
 
-python scripts/filter_representatives.py input.tsv rep_sequences.fasta representatives.tsv
-```
+**Outputs for negative dataset:**
 
-Parameters
+| File | Description |
+|------|-------------|
+| `neg_cluster.tsv` | Maps each sequence ID to its cluster representative |
+| `neg_rep_seq.fasta` | FASTA of all cluster representatives |
+| `neg_all_seq.fasta` | All input sequences used for clustering |
 
---min-seq-id 0.3 → Cluster at 30% sequence identity
+**Outputs for positive dataset:**
 
--c 0.4 → Minimum coverage 40%
+| File | Description |
+|------|-------------|
+| `positive_cluster.tsv` | Maps each sequence ID to its cluster representative |
+| `positive_rep_seq.fasta` | FASTA of all positive cluster representatives |
+| `positive_all_seq.fasta` | All positive sequences used for clustering |
 
---cov-mode 0 → Full-length alignment mode
+---
 
---cluster-mode 1 → Greedy set cover clustering
+## 5. Results After Redundancy Filtering
 
-Run separately for:
-```
-positive.fasta
+| Type | Count |
+|------|-------|
+| Non-redundant positives | 1093 |
+| Non-redundant negatives | 8934 |
+| Non-redundant negatives with helix transmembrane | 636 |
 
-negative.fasta
-```
+---
 
-Output Files
+## 6. Data Splitting Strategy
 
-| File                              | Description                          |
-| --------------------------------- | ------------------------------------ |
-| `positive_cluster_rep_seq.fasta`  | Representative sequences (positives) |
-| `positive_cluster_all_seqs.fasta` | All cluster members (positives)      |
-| `positive_cluster_cluster.tsv`    | Cluster mapping (positives)          |
-| `negative_cluster_rep_seq.fasta`  | Representative sequences (negatives) |
-| `negative_cluster_all_seqs.fasta` | All cluster members (negatives)      |
-| `negative_cluster_cluster.tsv`    | Cluster mapping (negatives)          |
+To ensure proper training and unbiased evaluation:
 
-## Step 2 — Selecting Representative Sequences
+### Training vs. Benchmarking
 
-Filters the .tsv metadata file to keep only representative sequences obtained after MMSeqs2 clustering.
+- **80%** of both positive and negative sequences → training set  
+- **20%** of both positive and negative sequences → benchmarking set (holdout)
 
-Command
-```
-python scripts/filter_representatives.py input.tsv rep_sequences.fasta representatives.tsv
+### Cross-Validation on Training Data
 
+- Generate **5-fold cross-validation subsets** from the training set  
+- Preserve the **overall positive/negative ratio** in each fold  
+- Store the fold assignment in a `.tsv` file for reproducibility
 
-Inputs
+---
 
-input.tsv → Metadata file containing all sequences
+## 7. Dataset Structure
 
-rep.fasta → FASTA file with cluster representative sequences
+The final `.tsv` dataset generated using `prepare_dataset.py` contains the following columns:
 
-output.tsv → Filtered metadata file (representatives only 
-```
-Example Usage
-```
-python3 scripts/filter_representatives.py positive.tsv positive_cluster_rep_seq.fasta positive_filtered.tsv
-python3 scripts/filter_representatives.py negative.tsv negative_cluster_rep_seq.fasta negative_filtered.tsv
-```
-Output Files
-📁 File	🧾 Description
-positive_filtered.tsv	Filtered metadata for representative positive sequences (~2933 → ~1094)
-negative_filtered.tsv	Filtered metadata for representative negative sequences (~20616 → ~8935)
-| 📁 File                     | 🧾 Description                                                                 |
-|-----------------------------|-------------------------------------------------------------------------------|
-| `positive_filtered.tsv`      | Filtered metadata for representative positive sequences (~2933 → ~1094)       |
-| `negative_filtered.tsv`      | Filtered metadata for representative negative sequences (~20616 → ~8935)     |
-``
-Ensures one representative per cluster, reducing redundancy.
+| Column | Description |
+|--------|-------------|
+| `EntryID` | Unique identifier for each protein |
+| `OrganismName` | Name of the source organism |
+| `Kingdom` | Taxonomic kingdom of the protein |
+| `SequenceLength` | Length of the protein sequence |
+| `HelixDomain` | True/False for negative entries; NaN for positives |
+| `Class` | Negative / Positive |
+| `SPstart` | Signal peptide start (for positives) |
+| `SPend` | Signal peptide end (for positives) |
+| `Set` | Fold number (1–5) for training entries; `Benchmark` for benchmarking entries |
+| `Sequence` | Amino acid sequence |
 
-## Step 3 — Splitting Training and Benchmarking Data
+---
 
-Command
-```
-python3 scripts/split_train_test.py positive_filtered.tsv positive_train.tsv positive_test.tsv
-python3 scripts/split_train_test.py negative_filtered.tsv negative_train.tsv negative_test.tsv
-```
-| 📁 File               | 🧾 Description                                                |
-|----------------------|---------------------------------------------------------------|
-| `positive_train.tsv`  | 80% of positive representative sequences (training)          |
-| `positive_test.tsv`   | 20% of positive representative sequences (testing)           |
-| `negative_train.tsv`  | 80% of negative representative sequences (training)          |
-| `negative_test.tsv`   | 20% of negative representative sequences (testing)           |
+## 8. Resulting Dataset Sizes
 
-Split the non-redundant datasets into 80% training and 20% benchmarking/testing sets.
+| Dataset | Negatives | Positives |
+|---------|-----------|-----------|
+| Training Set (total) | 7147 | 874 |
+| Benchmark Set | 1787 | 219 |
+| **Total** | 8934 | 1093 |
 
-### Step 4 — Building 5-Fold Cross-Validation Subsets
+---
 
-Maintain balanced positive/negative ratios across 5 folds.
+## 9. Summary
 
- Command
- ```
-python3 scripts/make_crossval_folds.py positive_train.tsv negative_train.tsv train_folds.tsv
-```
-Outputfile
+By following this pipeline, we:
 
-| 📁 **File**       | 🧾 **Description**                          |
-| ----------------- | ------------------------------------------- |
-| `train_folds.tsv` | Training sequences with assigned fold (1–5) |
+- Reduced redundancy in both positive and negative datasets using **MMseqs2**  
+- Selected **representative sequences**  
+- Split data into **training and benchmarking sets** (80/20)  
+- Built **5-fold cross-validation splits** for training  
+- Ensured reproducibility and balanced datasets  
 
-Each sequence appears once in validation during cross-validation.
-
-### Step 5 — Verification Steps
-
-| 🧠 **Check**                 | 💻 **Command**                                                                    | 📊 **Expected Result**                        |
-| ---------------------------- | --------------------------------------------------------------------------------- | --------------------------------------------- |
-| **Filtering effectiveness**  | `wc -l positive.tsv positive_filtered.tsv negative.tsv negative_filtered.tsv`     | Confirms reduced redundancy                   |
-| **Train/test split (80/20)** | `wc -l positive_train.tsv positive_test.tsv negative_train.tsv negative_test.tsv` | Confirms 80/20 ratio                          |
-| **5-fold balance**           | `cut -f7 train_folds.tsv \| sort \| uniq -c`                                      | Shows folds 1–5 with balanced sequence counts |
-
-### Summary
-By completing Practical Session I (Part B), we have:
-
-🧹 Reduced redundancy in both positive & negative datasets (MMSeqs2)
-
-🧬 Selected representative sequences
-
-📑 Filtered metadata to keep only representatives
-
-🔀 Split datasets into 80/20 training and benchmarking sets
-
-🎯 Built 5-fold cross-validation subsets with balanced class ratios
-
-Result: A clean, balanced, and reproducible dataset ready for machine learning applications.
-
+> The resulting dataset is **clean, balanced, and ready for machine learning–based signal peptide prediction**.
