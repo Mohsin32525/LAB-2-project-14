@@ -1,0 +1,2 @@
+Method,Best CV AUC,Selected Features
+Embedded (RF) + SVM,0.9715907529747305,"Hydro40_Mean, Comp22_L, OneHot_C, Helix_Mean, OneHot_R, Hydro_Mean, Charge_Neg, OneHot_T, Beta_Mean, Hydro_Std, Vol_Mean, Comp22_R, Net_Charge, OneHot_K, OneHot_L, OneHot_Y, OneHot_M, OneHot_I, OneHot_E, OneHot_W, Comp22_E, OneHot_N, OneHot_S, Comp22_A, OneHot_P, Vol_Std, OneHot_D, OneHot_F, OneHot_G, OneHot_V"
