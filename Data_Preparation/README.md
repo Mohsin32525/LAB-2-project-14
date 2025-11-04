@@ -120,13 +120,10 @@ Outputfile
 
 Each sequence appears once in validation during cross-validation.
 
-### Step 5 — Verification Steps
 
-| 🧠 **Check**                 | 💻 **Command**                                                                    | 📊 **Expected Result**                        |
-| ---------------------------- | --------------------------------------------------------------------------------- | --------------------------------------------- |
-| **Filtering effectiveness**  | `wc -l positive.tsv positive_filtered.tsv negative.tsv negative_filtered.tsv`     | Confirms reduced redundancy                   |
-| **Train/test split (80/20)** | `wc -l positive_train.tsv positive_test.tsv negative_train.tsv negative_test.tsv` | Confirms 80/20 ratio                          |
-| **5-fold balance**           | `cut -f7 train_folds.tsv \| sort \| uniq -c`                                      | Shows folds 1–5 with balanced sequence counts |
+## Step 5 — Merging Sequences and Benchmark Data
+
+All sequences (positive + negative) are merged into one FASTA file:
 bash 
 ```
 from Bio import SeqIO
@@ -138,25 +135,58 @@ all_sequences = list(neg_sequences) + list(pos_sequences)
 
 with open("repressive_dataset.fasta", "w") as output_handle:
     SeqIO.write(all_sequences, output_handle, "fasta")
+```
+
+Benchmark sequences are then annotated with Set = Benchmark, while training sequences receive fold IDs (Set = 0–4).
+Final merged dataset is exported as:
+bash
+```
 
 data.to_csv("data.tsv", sep="\t", index=False)
 ```
+## Resulting Dataset Columns:
+
+| Column              | Description                   |
+| ------------------- | ----------------------------- |
+| `EntryID`           | Protein ID                    |
+| `OrganismName`      | Organism name                 |
+| `Kingdom`           | Taxonomic kingdom             |
+| `SequenceLength`    | Sequence length               |
+| `SPStart` / `SPEnd` | Signal peptide boundaries     |
+| `Label`             | Positive / Negative           |
+| `Sequence`          | Amino acid sequence           |
+| `Set`               | Fold index (0–4) or Benchmark |
+
+## Step 6 — Verification Steps
+
+| 🧠 Check                     | 💻 Command                                                                        | 📊 Expected Result                            |
+| ---------------------------- | --------------------------------------------------------------------------------- | --------------------------------------------- |
+| **Filtering effectiveness**  | `wc -l positive.tsv positive_filtered.tsv negative.tsv negative_filtered.tsv`     | Confirms reduced redundancy                   |
+| **Train/test split (80/20)** | `wc -l positive_train.tsv positive_test.tsv negative_train.tsv negative_test.tsv` | Confirms 80/20 ratio                          |
+| **5-fold balance**           | `cut -f7 train_folds.tsv \| sort \| uniq -c`                                      | Shows folds 1–5 with balanced sequence counts |
+
+## Final Dataset Statistics
+
+| Dataset       | Positive | Negative |
+| ------------- | -------- | -------- |
+| **Training**  | 874      | 7147     |
+| **Benchmark** | 219      | 1787     |
+
 
 
 ### Summary
-By completing Practical Session I (Part B), we have:
+By completing Data Preparation, we have successfully:
 
-🧹 Reduced redundancy in both positive & negative datasets (MMSeqs2)
+ Reduced redundancy in both positive & negative datasets (MMSeqs2)
 
-🧬 Selected representative sequences
+ Selected representative sequences
 
-📑 Filtered metadata to keep only representatives
+ Filtered metadata to keep only representatives
 
-🔀 Split datasets into 80/20 training and benchmarking sets
+ Split datasets into 80/20 training and benchmarking sets
 
-🎯 Built 5-fold cross-validation subsets with balanced class ratios
+ Built 5-fold cross-validation subsets with balanced class ratios
 
+ Created a unified data.tsv for downstream machine learning
 
- Result: Clean, balanced, reproducible datasets for ML.
-
-
+ Result: Clean, balanced, and reproducible datasets ready for model training and benchmarking.
