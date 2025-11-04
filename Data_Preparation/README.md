@@ -54,14 +54,16 @@ negative.fasta
 | `negative_cluster_cluster.tsv`    | Cluster mapping (negatives)          |
 
 
-Step 2 — Selecting Representative Sequences (filter_representatives.py)
+## Step 2 — Selecting Representative Sequences (filter_representatives.py)
 
 This script filters .tsv metadata files to retain only representative sequences identified after MMseqs2 clustering.
 
 Command:
+bash
+```
 
 python scripts/filter_representatives.py input.tsv rep_sequences.fasta representatives.tsv
-
+```
 Inputs:
 
 input.tsv → Metadata file containing all sequences
