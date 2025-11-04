@@ -92,7 +92,7 @@ Negative set: UniProt accession, organism name, kingdom, sequence length, and pr
 
 ---
 
-##  Overview
+## 📋 Overview
 
 | Step | Task | Tool/Script |
 |------|------|-------------|
@@ -100,59 +100,33 @@ Negative set: UniProt accession, organism name, kingdom, sequence length, and pr
 | 2️⃣ | Select representative sequences | `filter_representatives.py` |
 | 3️⃣ | Split data into training (80%) & test (20%) | `split_train_test.py` |
 | 4️⃣ | Build 5-fold cross-validation subsets | `make_crossval_folds.py` |
-| 5️⃣ | Verify dataset structure | Bash utilities |
+| 5️⃣ | Verify dataset structure | **Bash utilities** |
 
 ---
 
-## Step 1 — Clustering Sequences with MMSeqs2
+## 🧩 Step 1 — Clustering Sequences with MMSeqs2
 
 Cluster positive and negative datasets independently to remove redundancy.
 
-
-Commond
+**Command:**
 ```bash
-
 mmseqs easy-cluster input.fa cluster-results tmp --min-seq-id 0.3 -c 0.4 --cov-mode 0 --cluster-mode 1
 
-
-Scripts Overview
-1. filter_representatives.py
-
-Filters the .tsv metadata file to keep only the representative sequences obtained after MMseqs2 clustering.
-
-Inputs:
-
-input.tsv → metadata file containing all sequences
-
-rep.fasta → FASTA file with cluster representative sequences
-
-output.tsv → filtered metadata file (representatives only)
-
-```bash
-
-python scripts/filter_representatives.py input.tsv rep_sequences.fasta representatives.tsv
 ```
-
-Parameters
-
---min-seq-id 0.3 → Cluster at 30% sequence identity
-
--c 0.4 → Minimum coverage 40%
-
---cov-mode 0 → Full-length alignment mode
-
---cluster-mode 1 → Greedy set cover clustering
+| Parameter          | Description                      |
+| ------------------ | -------------------------------- |
+| `--min-seq-id 0.3` | Cluster at 30% sequence identity |
+| `-c 0.4`           | Minimum coverage 40%             |
+| `--cov-mode 0`     | Full-length alignment mode       |
+| `--cluster-mode 1` | Greedy set cover clustering      |
 
 Run separately for:
-```
-positive.fasta
 
+positive.fasta  
 negative.fasta
-```
 
-Output Files
-
-| File                              | Description                          |
+## Output Files:
+ | File                              | Description                          |
 | --------------------------------- | ------------------------------------ |
 | `positive_cluster_rep_seq.fasta`  | Representative sequences (positives) |
 | `positive_cluster_all_seqs.fasta` | All cluster members (positives)      |
@@ -161,24 +135,26 @@ Output Files
 | `negative_cluster_all_seqs.fasta` | All cluster members (negatives)      |
 | `negative_cluster_cluster.tsv`    | Cluster mapping (negatives)          |
 
-## Step 2 — Selecting Representative Sequences
 
-Filters the .tsv metadata file to keep only representative sequences obtained after MMSeqs2 clustering.
+## Step 2 — Selecting Representative Sequences (filter_representatives.py)
 
-Command
+This script filters .tsv metadata files to retain only representative sequences identified after MMseqs2 clustering.
+
+Command:
+bash
 ```
+
 python scripts/filter_representatives.py input.tsv rep_sequences.fasta representatives.tsv
-
-
-Inputs
+```
+Inputs:
 
 input.tsv → Metadata file containing all sequences
 
 rep.fasta → FASTA file with cluster representative sequences
 
-output.tsv → Filtered metadata file (representatives only 
-```
+output.tsv → Filtered metadata file (representatives only)
 Example Usage
+
 ```
 python3 scripts/filter_representatives.py positive.tsv positive_cluster_rep_seq.fasta positive_filtered.tsv
 python3 scripts/filter_representatives.py negative.tsv negative_cluster_rep_seq.fasta negative_filtered.tsv
@@ -226,29 +202,76 @@ Outputfile
 
 Each sequence appears once in validation during cross-validation.
 
-### Step 5 — Verification Steps
 
-| 🧠 **Check**                 | 💻 **Command**                                                                    | 📊 **Expected Result**                        |
+## Step 5 — Merging Sequences and Benchmark Data
+
+All sequences (positive + negative) are merged into one FASTA file:
+bash 
+```
+from Bio import SeqIO
+
+neg_sequences = SeqIO.parse("negative_cluster_rep_seq.fasta", "fasta")
+pos_sequences = SeqIO.parse("positive_cluster_rep_seq.fasta", "fasta")
+
+all_sequences = list(neg_sequences) + list(pos_sequences)
+
+with open("repressive_dataset.fasta", "w") as output_handle:
+    SeqIO.write(all_sequences, output_handle, "fasta")
+```
+
+Benchmark sequences are then annotated with Set = Benchmark, while training sequences receive fold IDs (Set = 0–4).
+Final merged dataset is exported as:
+bash
+```
+
+data.to_csv("data.tsv", sep="\t", index=False)
+```
+## Resulting Dataset Columns:
+
+| Column              | Description                   |
+| ------------------- | ----------------------------- |
+| `EntryID`           | Protein ID                    |
+| `OrganismName`      | Organism name                 |
+| `Kingdom`           | Taxonomic kingdom             |
+| `SequenceLength`    | Sequence length               |
+| `SPStart` / `SPEnd` | Signal peptide boundaries     |
+| `Label`             | Positive / Negative           |
+| `Sequence`          | Amino acid sequence           |
+| `Set`               | Fold index (0–4) or Benchmark |
+
+## Step 6 — Verification Steps
+
+| 🧠 Check                     | 💻 Command                                                                        | 📊 Expected Result                            |
 | ---------------------------- | --------------------------------------------------------------------------------- | --------------------------------------------- |
 | **Filtering effectiveness**  | `wc -l positive.tsv positive_filtered.tsv negative.tsv negative_filtered.tsv`     | Confirms reduced redundancy                   |
 | **Train/test split (80/20)** | `wc -l positive_train.tsv positive_test.tsv negative_train.tsv negative_test.tsv` | Confirms 80/20 ratio                          |
 | **5-fold balance**           | `cut -f7 train_folds.tsv \| sort \| uniq -c`                                      | Shows folds 1–5 with balanced sequence counts |
 
+## Final Dataset Statistics
+
+| Dataset       | Positive | Negative |
+| ------------- | -------- | -------- |
+| **Training**  | 874      | 7147     |
+| **Benchmark** | 219      | 1787     |
+
+
+
 ### Summary
-By completing Practical Session I (Part B), we have:
+By completing Data Preparation, we have successfully:
 
-🧹 Reduced redundancy in both positive & negative datasets (MMSeqs2)
+ Reduced redundancy in both positive & negative datasets (MMSeqs2)
 
-🧬 Selected representative sequences
+ Selected representative sequences
 
-📑 Filtered metadata to keep only representatives
+ Filtered metadata to keep only representatives
 
-🔀 Split datasets into 80/20 training and benchmarking sets
+ Split datasets into 80/20 training and benchmarking sets
 
-🎯 Built 5-fold cross-validation subsets with balanced class ratios
+ Built 5-fold cross-validation subsets with balanced class ratios
 
+ Created a unified data.tsv for downstream machine learning
 
- Result: Clean, balanced, reproducible datasets for ML.
+ Result: Clean, balanced, and reproducible datasets ready for model training and benchmarking.
 
 
 ## Analysis
