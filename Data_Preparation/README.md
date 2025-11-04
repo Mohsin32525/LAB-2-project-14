@@ -1,4 +1,4 @@
-## Data Preparation
+## 🧬 Data Preparation
 # Reducing Data Redundancy and Preparing Datasets
 
 ![Python](https://img.shields.io/badge/Python-3.8+-blue.svg)
@@ -10,7 +10,7 @@
 
 ---
 
-##  Overview
+## 📋 Overview
 
 | Step | Task | Tool/Script |
 |------|------|-------------|
@@ -18,59 +18,33 @@
 | 2️⃣ | Select representative sequences | `filter_representatives.py` |
 | 3️⃣ | Split data into training (80%) & test (20%) | `split_train_test.py` |
 | 4️⃣ | Build 5-fold cross-validation subsets | `make_crossval_folds.py` |
-| 5️⃣ | Verify dataset structure | Bash utilities |
+| 5️⃣ | Verify dataset structure | **Bash utilities** |
 
 ---
 
-## Step 1 — Clustering Sequences with MMSeqs2
+## 🧩 Step 1 — Clustering Sequences with MMSeqs2
 
 Cluster positive and negative datasets independently to remove redundancy.
 
-
-Commond
+**Command:**
 ```bash
-
 mmseqs easy-cluster input.fa cluster-results tmp --min-seq-id 0.3 -c 0.4 --cov-mode 0 --cluster-mode 1
 
-
-Scripts Overview
-1. filter_representatives.py
-
-Filters the .tsv metadata file to keep only the representative sequences obtained after MMseqs2 clustering.
-
-Inputs:
-
-input.tsv → metadata file containing all sequences
-
-rep.fasta → FASTA file with cluster representative sequences
-
-output.tsv → filtered metadata file (representatives only)
-
-```bash
-
-python scripts/filter_representatives.py input.tsv rep_sequences.fasta representatives.tsv
 ```
-
-Parameters
-
---min-seq-id 0.3 → Cluster at 30% sequence identity
-
--c 0.4 → Minimum coverage 40%
-
---cov-mode 0 → Full-length alignment mode
-
---cluster-mode 1 → Greedy set cover clustering
+| Parameter          | Description                      |
+| ------------------ | -------------------------------- |
+| `--min-seq-id 0.3` | Cluster at 30% sequence identity |
+| `-c 0.4`           | Minimum coverage 40%             |
+| `--cov-mode 0`     | Full-length alignment mode       |
+| `--cluster-mode 1` | Greedy set cover clustering      |
 
 Run separately for:
-```
-positive.fasta
 
+positive.fasta  
 negative.fasta
-```
 
-Output Files
-
-| File                              | Description                          |
+## Output Files:
+ | File                              | Description                          |
 | --------------------------------- | ------------------------------------ |
 | `positive_cluster_rep_seq.fasta`  | Representative sequences (positives) |
 | `positive_cluster_all_seqs.fasta` | All cluster members (positives)      |
@@ -79,24 +53,24 @@ Output Files
 | `negative_cluster_all_seqs.fasta` | All cluster members (negatives)      |
 | `negative_cluster_cluster.tsv`    | Cluster mapping (negatives)          |
 
-## Step 2 — Selecting Representative Sequences
 
-Filters the .tsv metadata file to keep only representative sequences obtained after MMSeqs2 clustering.
+Step 2 — Selecting Representative Sequences (filter_representatives.py)
 
-Command
-```
+This script filters .tsv metadata files to retain only representative sequences identified after MMseqs2 clustering.
+
+Command:
+
 python scripts/filter_representatives.py input.tsv rep_sequences.fasta representatives.tsv
 
-
-Inputs
+Inputs:
 
 input.tsv → Metadata file containing all sequences
 
 rep.fasta → FASTA file with cluster representative sequences
 
-output.tsv → Filtered metadata file (representatives only 
-```
+output.tsv → Filtered metadata file (representatives only)
 Example Usage
+
 ```
 python3 scripts/filter_representatives.py positive.tsv positive_cluster_rep_seq.fasta positive_filtered.tsv
 python3 scripts/filter_representatives.py negative.tsv negative_cluster_rep_seq.fasta negative_filtered.tsv
@@ -151,6 +125,21 @@ Each sequence appears once in validation during cross-validation.
 | **Filtering effectiveness**  | `wc -l positive.tsv positive_filtered.tsv negative.tsv negative_filtered.tsv`     | Confirms reduced redundancy                   |
 | **Train/test split (80/20)** | `wc -l positive_train.tsv positive_test.tsv negative_train.tsv negative_test.tsv` | Confirms 80/20 ratio                          |
 | **5-fold balance**           | `cut -f7 train_folds.tsv \| sort \| uniq -c`                                      | Shows folds 1–5 with balanced sequence counts |
+bash 
+```
+from Bio import SeqIO
+
+neg_sequences = SeqIO.parse("negative_cluster_rep_seq.fasta", "fasta")
+pos_sequences = SeqIO.parse("positive_cluster_rep_seq.fasta", "fasta")
+
+all_sequences = list(neg_sequences) + list(pos_sequences)
+
+with open("repressive_dataset.fasta", "w") as output_handle:
+    SeqIO.write(all_sequences, output_handle, "fasta")
+
+data.to_csv("data.tsv", sep="\t", index=False)
+```
+
 
 ### Summary
 By completing Practical Session I (Part B), we have:
