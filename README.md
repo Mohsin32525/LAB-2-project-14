@@ -442,7 +442,269 @@ After performing 5-fold cross-validation, the average performance metrics of the
 
 [ 55 162]]
 
+## SVM pipeline, including:
 
+Custom feature engineering
+
+RF-based feature selection
+
+Nested 5-fold CV
+
+Grid search
+
+Final metrics
+
+Stable features
+
+Confusion matrix
+
+Everything is written clearly, reproducibly, and suitable for a GitHub project.
+
+SVM Classification Pipeline (Custom Feature Extraction + Nested 5-Fold CV)
+
+This section describes the complete SVM-based classification workflow implemented for Signal Peptide (SP) detection. The pipeline includes custom domain-aware feature extraction, Random Forest–based feature selection, nested 5-fold cross-validation, and a multi-kernel SVM grid search.
+
+## 1. Overview
+
+The goal is to classify protein sequences into:
+
+Positive (1) = contains a Signal Peptide
+
+Negative (0) = does not contain a Signal Peptide
+
+To achieve high performance and avoid data leakage, the workflow uses:
+
+Custom feature extraction based on biochemical properties
+
+Feature selection via Random Forest
+
+Nested 5-fold cross-validation
+
+Hyperparameter optimization using GridSearchCV
+
+Evaluation on a fully independent benchmark set
+
+## 2. Feature Extraction
+
+Each protein sequence is converted into a biologically meaningful numerical vector using:
+
+2.1 Amino Acid Composition (first 22 residues)
+
+20 features representing the normalized frequency of:
+
+ ```bash
+ACDEFGHIKLMNPQRSTVWY
+```
+## 2.2 Hydrophobicity Features (Kyte–Doolittle)
+
+Computed on the first 40 residues:
+
+Mean hydrophobicity
+
+Maximum hydrophobicity within sliding windows
+
+## 2.3 Charge Features (first 10 residues)
+
+Positive charge = K + R
+
+Negative charge = D + E
+
+Net charge = positive − negative
+
+## 2.4 Global Biochemical Statistics
+
+For the full sequence:
+
+Hydrophobicity (mean, std)
+
+Volume (mean, std)
+
+Helix propensity (mean, std)
+
+Beta-sheet propensity (mean, std)
+
+Feature Vector Size
+
+Total number of engineered features: 53
+
+All features are stored with interpretable names such as:
+
+AA_A, AA_L, Hydro_Mean, Hydro_Max, Pos_Charge, Neg_Charge, Net_Charge, Vol_Mean, Helix_Std, ...
+
+## 3. Dataset Splitting Strategy
+
+The input dataset contains a Set column defining whether a protein belongs to:
+
+Cross-Validation Set (Set = 0–4)
+
+Benchmark Set (non-numeric Set values)
+
+This ensures:
+
+No leakage between CV and benchmark
+
+Controlled class distribution
+
+Full reproducibility
+
+Counts:
+
+CV dataset     = 8021 samples
+Benchmark set = 2006 samples
+
+## 4. Nested 5-Fold Cross-Validation
+
+For fold i:
+
+Test Set = fold i
+
+Validation Set = fold (i + 1) mod 5
+
+Training Sets = remaining three folds
+
+Each fold includes:
+
+Feature extraction
+
+Random Forest feature ranking
+
+Selection of optimal number of features (k = 3 to 25) based on validation MCC
+
+Standard scaling
+
+SVM hyperparameter grid search
+
+Evaluation on the test fold
+
+The following NPZ files are generated automatically:
+
+training_features_i.npz
+validation_features_i.npz
+testing_features_i.npz
+
+## 5. Feature Selection
+
+Feature importance is computed on the training set only using:
+
+RandomForestClassifier(n_estimators=200)
+
+
+For each fold:
+
+The best number of features (k) is chosen by maximizing MCC on the validation fold.
+
+Selected features are stored and tracked across folds.
+
+Stable features (selected in ≥ 4 folds) are reported.
+
+## 6. SVM Hyperparameter Optimization
+
+A multi-kernel grid search is applied:
+
+``` Linear Kernel
+C ∈ {0.5, 1, 2, 4}
+
+RBF Kernel
+C ∈ {1, 2, 4, 8}
+gamma ∈ {0.5, 1, 2, "scale"}
+
+Polynomial Kernel
+C ∈ {1, 2}
+degree ∈ {2, 3}
+gamma ∈ {"scale", 1}
+coef0 ∈ {0, 1}
+
+Sigmoid Kernel
+C ∈ {1, 2, 4}
+gamma ∈ {"scale", 1}
+coef0 ∈ {0, 1}
+```
+
+
+The best model is selected based on the validation MCC.
+
+## 7. Final Results (Nested 5-Fold CV)
+
+Performance averaged across the five folds:
+
+```MCC       : 0.8042 ± 0.0161
+Accuracy  : 0.9615 ± 0.0032
+Precision : 0.8156 ± 0.0235
+Recall    : 0.8364 ± 0.0256
+```
+
+Average Confusion Matrix
+	Predicted 0	Predicted 1
+True 0	1396	33
+True 1	28	146
+8. Kernel Usage Frequencies
+
+Across 5 folds:
+
+RBF kernel     = 4 folds
+Linear kernel  = 1 fold
+
+
+RBF is consistently preferred, confirming non-linear separation.
+
+## 9. Stable Features (Selected in ≥ 4 Folds)
+
+A total of 22 stable features were consistently selected:
+~~~
+Hydro_Max
+Hydro_Mean
+AA_L
+Neg_Charge
+AA_A
+AA_R
+Net_Charge
+AA_F
+AA_V
+AA_N
+AA_S
+AA_G
+AA_E
+AA_K
+AA_I
+AA_P
+AA_C
+Pos_Charge
+AA_W
+AA_D
+AA_T
+AA_Q
+~~~
+
+
+These represent the most informative biochemical properties distinguishing SP from non-SP proteins.
+
+## 10. Summary of the Pipeline
+
+Load dataset and validate structure
+
+Extract 53 biochemical features
+
+Split into CV and benchmark sets
+
+Perform nested 5-fold cross-validation:
+
+RF-based feature ranking
+
+Optimal top-k feature selection
+
+Standardization
+
+SVM grid search
+
+Evaluate on test fold
+
+Aggregate results across folds
+
+Compute stable features
+
+Save all results and plots
+
+This pipeline achieves robust, high-performing SP detection with biologically interpretable features and strict separation of training, validation, and testing data.
 
 
 
